@@ -15,7 +15,7 @@ sudo pacman -S --needed chezmoi
 chezmoi holt das Repo und fragt interaktiv, welche Komponenten installiert werden sollen:
 
 ```bash
-chezmoi init --apply https://github.com/martinbartolome/dotfiles
+chezmoi init --apply https://github.com/MartinBartolome/linux-config
 ```
 
 Während `init` werden folgende Fragen gestellt (Enter = Standardwert):
