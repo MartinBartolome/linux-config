@@ -1,0 +1,49 @@
+#!/bin/bash
+# run_onchange_after_install-copilot-skills.sh
+# Installs VS Code extensions and Copilot agent skills.
+# Requires VS Code to already be installed (development = true).
+{{- if not .copilot_skills }}
+exit 0
+{{- end }}
+set -euo pipefail
+
+# ------------------------------------------------
+# VS Code extensions
+# ------------------------------------------------
+EXTENSIONS=(
+    GitHub.copilot
+    GitHub.copilot-chat
+)
+
+echo "==> Installing VS Code extensions..."
+
+for ext in "${EXTENSIONS[@]}"; do
+    if code --list-extensions 2>/dev/null | grep -qx "$ext"; then
+        echo "  -> $ext already installed"
+    else
+        echo "  -> Installing $ext..."
+        code --install-extension "$ext" --force
+    fi
+done
+
+# ------------------------------------------------
+# Copilot agent skills
+# ------------------------------------------------
+
+PROMPTS_DIR="${HOME}/.config/Code/User/prompts"
+mkdir -p "$PROMPTS_DIR"
+
+# caveman — compresses agent output tokens (~75% reduction)
+# https://github.com/JuliusBrussee/caveman
+echo "==> Installing caveman Copilot skill..."
+curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
+
+# grill-me — relentlessly interviews you about a plan until shared understanding
+# https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me
+echo "==> Installing grill-me Copilot skill..."
+curl -fsSL \
+  https://raw.githubusercontent.com/mattpocock/skills/main/skills/productivity/grill-me/SKILL.md \
+  -o "$PROMPTS_DIR/grill-me.md"
+echo "  -> Installed to $PROMPTS_DIR/grill-me.md"
+
+echo "==> Copilot skills installation completed"

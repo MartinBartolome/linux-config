@@ -1,0 +1,38 @@
+#!/bin/bash
+# run_onchange_after_install-desktop-apps-devtools.sh
+# Installs developer tools via yay.
+{{- if not .development }}
+exit 0
+{{- end }}
+set -euo pipefail
+
+PACKAGES=(
+    visual-studio-code-bin
+    docker
+    docker-compose
+)
+
+echo "==> Installing dev tools..."
+
+for pkg in "${PACKAGES[@]}"; do
+    if ! pacman -Q "$pkg" &>/dev/null; then
+        echo "  -> Installing $pkg..."
+        yay -S --noconfirm --needed "$pkg"
+    else
+        echo "  -> $pkg already installed"
+    fi
+done
+
+# ------------------------------------------------
+# Docker post-install
+# ------------------------------------------------
+echo "==> Configuring Docker..."
+sudo systemctl enable --now docker.service
+if ! groups "$USER" | grep -qw docker; then
+    sudo usermod -aG docker "$USER"
+    echo "  -> Added $USER to docker group (re-login required)"
+else
+    echo "  -> $USER already in docker group"
+fi
+
+echo "==> Dev tools installation completed"

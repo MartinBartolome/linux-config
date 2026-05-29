@@ -1,0 +1,25 @@
+#!/bin/bash
+# run_onchange_after_install-desktop-apps-gaming.sh
+# Installs gaming-related desktop applications via yay.
+{{- if not .gaming }}
+exit 0
+{{- end }}
+set -euo pipefail
+
+PACKAGES=(
+    steam
+    heroic
+)
+
+echo "==> Installing gaming apps..."
+
+for pkg in "${PACKAGES[@]}"; do
+    if ! pacman -Q "$pkg" &>/dev/null; then
+        echo "  -> Installing $pkg..."
+        yay -S --noconfirm --needed "$pkg"
+    else
+        echo "  -> $pkg already installed"
+    fi
+done
+
+echo "==> Gaming apps installation completed"

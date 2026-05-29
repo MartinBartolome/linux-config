@@ -1,0 +1,44 @@
+#!/bin/bash
+# run_onchange_after_clone-repos.sh
+# Clones all repositories listed in ~/.config/repos.txt into ~/Projects/.
+# Re-runs automatically whenever repos.txt changes.
+#
+# repos.txt checksum (triggers re-run on change):
+# {{ include "dot_config/repos.list" | sha256sum }}
+set -euo pipefail
+
+REPOS_FILE="${HOME}/.config/repos.list"
+CLONE_DIR="${HOME}/Projects"
+
+if [ ! -f "$REPOS_FILE" ]; then
+    echo "==> No repos.list found at $REPOS_FILE, skipping"
+    exit 0
+fi
+
+mkdir -p "$CLONE_DIR"
+
+echo "==> Cloning repositories into $CLONE_DIR..."
+
+while IFS= read -r line || [ -n "$line" ]; do
+    # Skip empty lines and comments
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+
+    url=$(echo "$line" | awk '{print $1}')
+    dirname=$(echo "$line" | awk '{print $2}')
+
+    # Derive folder name from URL if not specified
+    if [ -z "$dirname" ]; then
+        dirname=$(basename "$url" .git)
+    fi
+
+    target="$CLONE_DIR/$dirname"
+
+    if [ -d "$target/.git" ]; then
+        echo "  -> $dirname already cloned, skipping"
+    else
+        echo "  -> Cloning $url into $target..."
+        git clone "$url" "$target"
+    fi
+done < "$REPOS_FILE"
+
+echo "==> Repository cloning completed"

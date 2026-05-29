@@ -1,0 +1,26 @@
+#!/bin/bash
+# run_onchange_after_install-displaylink.sh
+# Installs the DisplayLink driver (evdi-dkms + displaylink) and enables the service.
+# Assumes base-devel, dkms, linux-cachyos-headers and yay are already present
+# (provided by run_once_before_install-packages.sh).
+{{- if not .displaylink }}
+exit 0
+{{- end }}
+set -euo pipefail
+
+# ------------------------------------------------
+# Install DisplayLink
+# ------------------------------------------------
+echo "==> Installing DisplayLink..."
+
+yay -S --needed --noconfirm \
+  evdi-dkms \
+  displaylink
+
+# ------------------------------------------------
+# Enable service
+# ------------------------------------------------
+echo "==> Enabling DisplayLink service..."
+sudo systemctl enable --now displaylink.service
+
+echo "==> DisplayLink installation completed"

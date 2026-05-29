@@ -1,0 +1,22 @@
+[user]
+	name = Martin Bartolomé
+	email = github@martinbartolome.ch
+[init]
+	defaultBranch = main
+[pull]
+	rebase = false
+[core]
+	editor = code --wait
+	autocrlf = input
+[push]
+	autoSetupRemote = true
+[fetch]
+	prune = true
+[diff]
+	tool = vscode
+[difftool "vscode"]
+	cmd = code --wait --diff $LOCAL $REMOTE
+[merge]
+	tool = vscode
+[mergetool "vscode"]
+	cmd = code --wait $MERGED

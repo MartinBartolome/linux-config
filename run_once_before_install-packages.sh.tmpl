@@ -1,0 +1,29 @@
+#!/bin/bash
+# run_once_before_install-packages.sh
+# Bootstraps the system: installs base dependencies and yay (AUR helper).
+# Runs once per machine (chezmoi run_once semantics).
+set -euo pipefail
+
+echo "==> Installing base dependencies..."
+sudo pacman -S --needed --noconfirm \
+  base-devel \
+  git \
+  dkms \
+  linux-cachyos-headers
+
+# ------------------------------------------------
+# Install yay (AUR helper) if not already present
+# ------------------------------------------------
+if ! command -v yay &>/dev/null; then
+  echo "==> Installing yay..."
+
+  TMP_DIR=$(mktemp -d)
+  trap 'rm -rf "$TMP_DIR"' EXIT
+
+  git clone https://aur.archlinux.org/yay.git "$TMP_DIR/yay"
+  (cd "$TMP_DIR/yay" && makepkg -si --noconfirm)
+
+  echo "==> yay installed successfully"
+else
+  echo "==> yay already installed, skipping"
+fi

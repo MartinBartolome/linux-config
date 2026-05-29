@@ -1,0 +1,42 @@
+#!/bin/bash
+# run_onchange_after_install-nvidia.sh
+# Installs NVIDIA proprietary drivers for CachyOS (linux-cachyos kernel).
+{{- if not .nvidia }}
+exit 0
+{{- end }}
+set -euo pipefail
+
+PACKAGES=(
+    nvidia-dkms
+    nvidia-utils
+    nvidia-settings
+    lib32-nvidia-utils
+)
+
+echo "==> Installing NVIDIA drivers..."
+
+for pkg in "${PACKAGES[@]}"; do
+    if ! pacman -Q "$pkg" &>/dev/null; then
+        echo "  -> Installing $pkg..."
+        sudo pacman -S --needed --noconfirm "$pkg"
+    else
+        echo "  -> $pkg already installed"
+    fi
+done
+
+# ------------------------------------------------
+# Enable DRM kernel mode setting (required for
+# Wayland and proper suspend/resume support)
+# ------------------------------------------------
+GRUB_FILE="/etc/default/grub"
+PARAM="nvidia-drm.modeset=1"
+
+if ! grep -q "$PARAM" "$GRUB_FILE"; then
+    echo "==> Adding $PARAM to GRUB_CMDLINE_LINUX_DEFAULT..."
+    sudo sed -i "s/\(GRUB_CMDLINE_LINUX_DEFAULT=\"[^\"]*\)\"/\1 $PARAM\"/" "$GRUB_FILE"
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
+else
+    echo "==> $PARAM already set in GRUB"
+fi
+
+echo "==> NVIDIA installation completed — reboot required"
