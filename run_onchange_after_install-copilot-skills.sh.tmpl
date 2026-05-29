@@ -22,7 +22,7 @@ for ext in "${EXTENSIONS[@]}"; do
         echo "  -> $ext already installed"
     else
         echo "  -> Installing $ext..."
-        code --install-extension "$ext" --force
+        code --install-extension "$ext"
     fi
 done
 
